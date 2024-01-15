@@ -1,16 +1,46 @@
-version: '2.3'
+version: "3.8"
 
 services:
-  johncena:
-    # image: collaborating.tuhh.de:5005/cmx8665/master-thesis/darknet:latest
+  example_service:
+    container_name: example_service
+    working_dir: /app
+    image: collaborating.tuhh.de:5005/cmx8665/master-thesis/darknet:latest
     build:
       context: ./
       dockerfile: test.Dockerfile
+      args:
+        - BASE_IMAGE=ubuntu:22.04
+    privilaged: true
+    network_mode: host
     environment:
-      - "QT_X11_NO_MITSHM=1"
-      - "DISPLAY"
+      - QT_X11_NO_MITSHM=1
+      - DISPLAY
+      - LOGURU_LEVEL=DEBUG
+    env_file: #alternative/additional to environment (when there are many envs)
+      - .env
+    device_cgroup_rules:
+      - 'c 189:* rmw'
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ./shared_vol:/shared_cena
+      - ./shared_vol:/shared_vol
+    ports:
+      - 5001:5001
+      - 5002:5002
     runtime: nvidia
     command: sleep infinity
+    entrypoint: sleep infinity #alternative to command to overwrite entrypoint in docker file
+    networks:
+      - vlan
+
+networks:
+  vlan:
+    driver: macvlan
+    driver_opts:
+      parent: ens24 #lan name
+    ipam:
+      config:
+        - subnet: 192.168.0.0/16
+          ip_range: 192.168.0.253/32
+          gateway: 192.168.0.1
+
+  
