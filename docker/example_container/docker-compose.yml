@@ -27,8 +27,8 @@ services:
       - 5001:5001
       - 5002:5002
     runtime: nvidia
-    command: sleep infinity
     entrypoint: sleep infinity #alternative to command to overwrite entrypoint in docker file
+    command: sleep infinity
     networks:
       - vlan
 
